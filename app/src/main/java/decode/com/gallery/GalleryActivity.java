@@ -1,6 +1,10 @@
 package decode.com.gallery;
 
 import android.content.Intent;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,16 +12,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+interface ICallback { void preview(Integer type); }
 
 // AppCompatActivity pentru compatibilitate cu chestii vechi
 // se poate si extends Activity
-public class GalleryActivity extends AppCompatActivity implements View.OnClickListener {
+public class GalleryActivity extends AppCompatActivity implements ICallback {
 
     public static final int PREVIEW_REQUEST_TYPE = 1;
 
-    private Button mPreviewButton;
-    private TextView resultText;
     private Integer result = 0;
+    private TabLayout tabs;
+    private ViewPager pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,20 +31,39 @@ public class GalleryActivity extends AppCompatActivity implements View.OnClickLi
         // R = resources (tot ce e in /res/)
         setContentView(R.layout.activity_gallery);
 
-        mPreviewButton = (Button) findViewById(R.id.button_preview);
-        mPreviewButton.setOnClickListener(this);
-
-        resultText = (TextView) findViewById(R.id.text_result);
 
         if (savedInstanceState != null) {
             result = savedInstanceState.getInt("result", 0);
         }
 
-        refresh();
+        tabs = findViewById(R.id.tabs);
+        pager = findViewById(R.id.pager);
+        pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int position) {
+                GalleryFragment fragment = new GalleryFragment();
+
+                Bundle arguments = new Bundle();
+                arguments.putInt("type", position + 1);
+                fragment.setArguments(arguments);
+
+                return fragment;
+            }
+
+            @Override
+            public int getCount() {
+                return 3;
+            }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return "Page " + (position + 1);
+            }
+        });
+        tabs.setupWithViewPager(pager);
     }
 
-    @Override
-    public void onClick(View view) {
+    public void preview(Integer type) {
         Intent intent = new Intent(this, PreviewActivity.class);
         // startActivity(intent);
 
@@ -63,14 +87,8 @@ public class GalleryActivity extends AppCompatActivity implements View.OnClickLi
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PREVIEW_REQUEST_TYPE) {
-            result = resultCode;
-            refresh();
+            pager.setCurrentItem(result - 1);
         }
-    }
-
-    private void refresh() {
-        // asta e doar pentru re-utilizare
-        resultText.setText("Result " + (result));
     }
 
     @Override

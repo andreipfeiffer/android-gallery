@@ -20,7 +20,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
     public static final int PREVIEW_REQUEST_TYPE = 1;
 
-    private Integer result = 0;
+    // private Integer result = 0;
     private TabLayout tabs;
     private ViewPager pager;
 
@@ -33,7 +33,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
 
         if (savedInstanceState != null) {
-            result = savedInstanceState.getInt("result", 0);
+            // result = savedInstanceState.getInt("result", 0);
         }
 
         tabs = findViewById(R.id.tabs);
@@ -100,6 +100,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         // care o recuperam din savedInstanceState, la onCreate pe activitate
         // ea e stocata la nivel de aplicatie
         // e pierde cand se inchide aplicatia
-        outState.putInt("result", result);
+
+        //outState.putInt("result", result);
     }
 }

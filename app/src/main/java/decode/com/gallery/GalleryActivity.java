@@ -87,7 +87,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PREVIEW_REQUEST_TYPE) {
-            pager.setCurrentItem(result - 1);
+            pager.setCurrentItem(resultCode - 1);
         }
     }
 

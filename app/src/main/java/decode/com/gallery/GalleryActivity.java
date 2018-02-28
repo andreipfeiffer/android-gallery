@@ -67,6 +67,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         Intent intent = new Intent(this, PreviewActivity.class);
         // startActivity(intent);
 
+        intent.putExtra("type", type);
+
         // requestCode e al meu, pun ce vreau
         startActivityForResult(intent, PREVIEW_REQUEST_TYPE);
     }

@@ -4,12 +4,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class PreviewActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button mButton1;
     private Button mButton2;
     private Button mButton3;
+    private TextView text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +27,11 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
 
         mButton3 = (Button) findViewById(R.id.button_back3);
         mButton3.setOnClickListener(this);
+
+        text = (TextView) findViewById(R.id.text_result);
+
+        Integer comingFromType = getIntent().getExtras().getInt("type");
+        text.setText("Coming from " + comingFromType);
     }
 
     @Override

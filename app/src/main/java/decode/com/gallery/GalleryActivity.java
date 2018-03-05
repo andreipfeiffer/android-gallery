@@ -1,7 +1,11 @@
 package decode.com.gallery;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -11,6 +15,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 interface ICallback { void preview(Integer type); }
@@ -26,7 +32,8 @@ interface ICallback { void preview(Integer type); }
 // se poate si extends Activity
 public class GalleryActivity extends AppCompatActivity implements ICallback {
 
-    public static final int PREVIEW_REQUEST_TYPE = 1;
+    public static final int REQUEST_PREVIEW = 1;
+    public static final int REQUEST_IMAGE_CAPTURE = 2;
 
     // private Integer result = 0;
     private TabLayout tabs;
@@ -105,7 +112,15 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         fab = findViewById(R.id.action_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Floating Action Button clicked", Toast.LENGTH_SHORT).show();
+
+                PackageManager pm = getPackageManager();
+                boolean deviceHasCameraFlag = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+
+                if (deviceHasCameraFlag) {
+                    dispatchTakePictureIntent();
+                } else {
+                    toast("No camera available");
+                }
             }
         });
     }
@@ -117,7 +132,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         intent.putExtra("type", type);
 
         // requestCode e al meu, pun ce vreau
-        startActivityForResult(intent, PREVIEW_REQUEST_TYPE);
+        startActivityForResult(intent, REQUEST_PREVIEW);
     }
 
     @Override
@@ -135,8 +150,20 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PREVIEW_REQUEST_TYPE) {
-            pager.setCurrentItem(resultCode - 1);
+
+        switch (requestCode) {
+            case REQUEST_PREVIEW:
+                pager.setCurrentItem(resultCode - 1);
+                break;
+            case REQUEST_IMAGE_CAPTURE:
+                if (resultCode == RESULT_OK) {
+                    Bundle extras = data.getExtras();
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    showImage(imageBitmap);
+                } else {
+                    toast("No Photo Taken");
+                }
+                break;
         }
     }
 
@@ -189,5 +216,31 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
                 Log.i("ITEM", "About");
                 break;
         }
+    }
+
+    private void toast(String text) {
+        Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        }
+    }
+
+    private void showImage(Bitmap imageBitmap) {
+        AlertDialog.Builder ImageDialog = new AlertDialog.Builder(this);
+        // ImageDialog.setTitle("Captured photo preview");
+        ImageView imageView = new ImageView(this);
+        imageView.setImageBitmap(imageBitmap);
+        ImageDialog.setView(imageView);
+
+        ImageDialog.setPositiveButton("Close", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface arg0, int arg1) {
+            }
+        });
+        ImageDialog.show();
     }
 }

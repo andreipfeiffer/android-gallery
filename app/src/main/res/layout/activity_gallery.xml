@@ -44,7 +44,8 @@
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/action_fab"
-            android:src="@drawable/ic_done"
+            android:src="@drawable/ic_camera"
+            android:tint="@color/colorWhite"
             app:fabSize="normal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

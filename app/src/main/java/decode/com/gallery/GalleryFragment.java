@@ -15,14 +15,14 @@ import android.widget.Button;
 public class GalleryFragment extends Fragment implements View.OnClickListener {
 
     private Button previewButton;
-    private Integer type;
+    private String type;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_gallery, container, false);
 
-        type = getArguments() != null ? getArguments().getInt("type") : 0;
+        type = getArguments() != null ? getArguments().getString("type") : "";
 
         previewButton = (Button) root.findViewById(R.id.button_preview);
         previewButton.setOnClickListener(this);

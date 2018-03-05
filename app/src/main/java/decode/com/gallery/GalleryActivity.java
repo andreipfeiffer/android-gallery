@@ -26,7 +26,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-interface ICallback { void preview(Integer type); }
+interface ICallback { void preview(String type); }
 
 // AppCompatActivity pentru compatibilitate cu chestii vechi
 // se poate si extends Activity
@@ -42,6 +42,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     private DrawerLayout drawer;
     private NavigationView navigation;
     private FloatingActionButton fab;
+    private String tabTitles[] = new String[] { "Photos", "Videos" };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +64,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
                 GalleryFragment fragment = new GalleryFragment();
 
                 Bundle arguments = new Bundle();
-                arguments.putInt("type", position + 1);
+                arguments.putString("type", tabTitles[position]);
                 fragment.setArguments(arguments);
 
                 return fragment;
@@ -71,12 +72,12 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
             @Override
             public int getCount() {
-                return 2;
+                return tabTitles.length;
             }
 
             @Override
             public CharSequence getPageTitle(int position) {
-                return position == 0 ? "Photos" : "Videos";
+                return tabTitles[position];
             }
         });
         tabs.setupWithViewPager(pager);
@@ -125,7 +126,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         });
     }
 
-    public void preview(Integer type) {
+    public void preview(String type) {
         Intent intent = new Intent(this, PreviewActivity.class);
         // startActivity(intent);
 

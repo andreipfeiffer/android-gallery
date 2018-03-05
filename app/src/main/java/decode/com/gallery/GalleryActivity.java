@@ -1,16 +1,24 @@
 package decode.com.gallery;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 interface ICallback { void preview(Integer type); }
 
@@ -24,6 +32,9 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     private TabLayout tabs;
     private ViewPager pager;
     private Toolbar toolbar;
+    private DrawerLayout drawer;
+    private NavigationView navigation;
+    private FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +76,39 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ActionBar actionbar = getSupportActionBar();
+        // asta adauga butonul de Home/Back
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        // asta doar seteaza icoana
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        // change icon color
+        toolbar.getNavigationIcon().setTint(Color.argb(255, 255, 255, 255));
+
+        drawer = findViewById(R.id.drawer_layout);
+
+        navigation = findViewById(R.id.drawer_navigation);
+        navigation.setNavigationItemSelectedListener(
+            new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(MenuItem item) {
+                    // set item as selected to persist highlight
+                    item.setChecked(true);
+                    drawer.closeDrawers();
+
+                    // Code to update the UI based on the item selected
+                    selectMenuItem(item);
+
+                    return true;
+                }
+            });
+
+        fab = findViewById(R.id.action_fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Floating Action Button clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void preview(Integer type) {
@@ -118,6 +162,14 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        selectMenuItem(item);
+        return true;
+    }
+
+    private void selectMenuItem(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            drawer.openDrawer(GravityCompat.START);
+        }
         if (item.getItemId() == R.id.action_about) {
             Log.i("ITEM", "About");
         }
@@ -132,6 +184,5 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
             Log.i("ITEM", "Video");
             pager.setCurrentItem(1);
         }
-        return true;
     }
 }

@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +24,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     // private Integer result = 0;
     private TabLayout tabs;
     private ViewPager pager;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,9 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
             }
         });
         tabs.setupWithViewPager(pager);
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
     public void preview(Integer type) {

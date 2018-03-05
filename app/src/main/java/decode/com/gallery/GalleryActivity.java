@@ -93,7 +93,6 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
                 @Override
                 public boolean onNavigationItemSelected(MenuItem item) {
                     // set item as selected to persist highlight
-                    item.setChecked(true);
                     drawer.closeDrawers();
 
                     // Code to update the UI based on the item selected
@@ -167,22 +166,28 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     }
 
     private void selectMenuItem(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            drawer.openDrawer(GravityCompat.START);
-        }
-        if (item.getItemId() == R.id.action_about) {
-            Log.i("ITEM", "About");
-        }
-        if (item.getItemId() == R.id.action_settings) {
-            Log.i("ITEM", "Settings");
-        }
-        if (item.getItemId() == R.id.action_photo) {
-            Log.i("ITEM", "Photo");
-            pager.setCurrentItem(0);
-        }
-        if (item.getItemId() == R.id.action_video) {
-            Log.i("ITEM", "Video");
-            pager.setCurrentItem(1);
+        // this works both from drawer menu & toolbar menu because we have same ids on buttons
+        navigation.setCheckedItem(item.getItemId());
+        // item.setChecked(true);
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                drawer.openDrawer(GravityCompat.START);
+                break;
+            case R.id.action_photo:
+                pager.setCurrentItem(0);
+                Log.i("ITEM", "Photos");
+                break;
+            case R.id.action_video:
+                pager.setCurrentItem(1);
+                Log.i("ITEM", "Videos");
+                break;
+            case R.id.action_settings:
+                Log.i("ITEM", "Settings");
+                break;
+            case R.id.action_about:
+                Log.i("ITEM", "About");
+                break;
         }
     }
 }

@@ -9,9 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuItem;
 
 interface ICallback { void preview(Integer type); }
 
@@ -54,12 +53,12 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
             @Override
             public int getCount() {
-                return 3;
+                return 2;
             }
 
             @Override
             public CharSequence getPageTitle(int position) {
-                return "Page " + (position + 1);
+                return position == 0 ? "Photos" : "Videos";
             }
         });
         tabs.setupWithViewPager(pager);
@@ -109,5 +108,30 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         // e pierde cand se inchide aplicatia
 
         //outState.putInt("result", result);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.gallery_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_about) {
+            Log.i("ITEM", "About");
+        }
+        if (item.getItemId() == R.id.action_settings) {
+            Log.i("ITEM", "Settings");
+        }
+        if (item.getItemId() == R.id.action_photo) {
+            Log.i("ITEM", "Photo");
+            pager.setCurrentItem(0);
+        }
+        if (item.getItemId() == R.id.action_video) {
+            Log.i("ITEM", "Video");
+            pager.setCurrentItem(1);
+        }
+        return true;
     }
 }

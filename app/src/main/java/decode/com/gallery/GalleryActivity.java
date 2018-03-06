@@ -6,8 +6,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.provider.MediaStore;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -26,7 +28,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-interface ICallback { void preview(String type); }
+interface ICallback {
+    void preview(String type);
+}
 
 // AppCompatActivity pentru compatibilitate cu chestii vechi
 // se poate si extends Activity
@@ -42,7 +46,9 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     private DrawerLayout drawer;
     private NavigationView navigation;
     private FloatingActionButton fab;
-    private String tabTitles[] = new String[] { "Photos", "Videos" };
+    private CoordinatorLayout coordinator;
+
+    private String tabTitles[] = new String[]{"Photos", "Videos"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,33 +103,38 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
         navigation = findViewById(R.id.drawer_navigation);
         navigation.setNavigationItemSelectedListener(
-            new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(MenuItem item) {
-                    // set item as selected to persist highlight
-                    drawer.closeDrawers();
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem item) {
+                        // set item as selected to persist highlight
+                        drawer.closeDrawers();
 
-                    // Code to update the UI based on the item selected
-                    selectMenuItem(item);
+                        // Code to update the UI based on the item selected
+                        selectMenuItem(item);
 
-                    return true;
-                }
-            });
+                        return true;
+                    }
+                });
 
         fab = findViewById(R.id.action_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
-                PackageManager pm = getPackageManager();
-                boolean deviceHasCameraFlag = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
-
-                if (deviceHasCameraFlag) {
-                    dispatchTakePictureIntent();
-                } else {
-                    toast("No camera available");
-                }
+                openCamera();
             }
         });
+
+        coordinator = findViewById(R.id.coordinator_Layout);
+    }
+
+    private void openCamera() {
+        PackageManager pm = getPackageManager();
+        boolean deviceHasCameraFlag = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+
+        if (deviceHasCameraFlag) {
+            dispatchTakePictureIntent();
+        } else {
+            toast("No camera available");
+        }
     }
 
     public void preview(String type) {
@@ -159,10 +170,27 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK) {
                     Bundle extras = data.getExtras();
-                    Bitmap imageBitmap = (Bitmap) extras.get("data");
-                    showImage(imageBitmap);
+                    final Bitmap imageBitmap = (Bitmap) extras.get("data");
+
+                    Snackbar snackbar = Snackbar
+                            .make(coordinator, "Photo was captured", Snackbar.LENGTH_LONG)
+                            .setAction("VIEW", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    showImage(imageBitmap);
+                                }
+                            });
+                    snackbar.show();
                 } else {
-                    toast("No Photo Taken");
+                    Snackbar
+                            .make(coordinator, "No photo taken", Snackbar.LENGTH_SHORT)
+                            .setAction("RETRY", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    openCamera();
+                                }
+                            })
+                            .show();
                 }
                 break;
         }
@@ -233,15 +261,15 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
     private void showImage(Bitmap imageBitmap) {
         AlertDialog.Builder ImageDialog = new AlertDialog.Builder(this);
-        // ImageDialog.setTitle("Captured photo preview");
+        ImageDialog
+                .setTitle("Captured photo preview")
+                .setMessage("The following image was captured")
+                .setIcon(R.drawable.ic_camera);
+
         ImageView imageView = new ImageView(this);
         imageView.setImageBitmap(imageBitmap);
-        ImageDialog.setView(imageView);
 
-        ImageDialog.setPositiveButton("Close", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface arg0, int arg1) {
-            }
-        });
+        ImageDialog.setView(imageView);
         ImageDialog.show();
     }
 }

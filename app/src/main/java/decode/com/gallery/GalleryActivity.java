@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
@@ -23,7 +24,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -80,7 +80,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
                 GalleryFragment fragment = new GalleryFragment();
 
                 Bundle arguments = new Bundle();
-                arguments.putString("type", tabTitles[position]);
+                arguments.putString("type", tabTitles[position].toLowerCase());
                 fragment.setArguments(arguments);
 
                 return fragment;

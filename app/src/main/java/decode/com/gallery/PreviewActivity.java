@@ -2,7 +2,6 @@ package decode.com.gallery;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 
 public class PreviewActivity extends AppCompatActivity {
 
@@ -12,9 +11,9 @@ public class PreviewActivity extends AppCompatActivity {
         setTitle("Preview");
         setContentView(R.layout.activity_preview);
 
-        Integer comingFromType = getIntent().getExtras().getInt("color");
+        Media media = getIntent().getExtras().getParcelable("media");
         SquareRelativeLayout wrapper = findViewById(R.id.item_wrapper);
 
-        wrapper.setBackgroundColor(comingFromType);
+        wrapper.setBackgroundColor(media.getColor());
     }
 }

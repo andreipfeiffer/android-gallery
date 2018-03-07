@@ -1,13 +1,16 @@
 package decode.com.gallery;
 
 import android.graphics.Color;
-import android.util.Log;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by lucian.cioroga on 3/7/2018.
  */
 
-public class Media {
+// aici doar am scris "implements Parcelable"
+// si am dat sa implementeze el tot ce trebuie
+public class Media implements Parcelable {
     public static final String TYPE_IMAGE = "photos";
     public static final String TYPE_VIDEO = "videos";
 
@@ -20,6 +23,24 @@ public class Media {
         mName = name;
         mColor = Color.parseColor(color);
     }
+
+    protected Media(Parcel in) {
+        mName = in.readString();
+        mType = in.readString();
+        mColor = in.readInt();
+    }
+
+    public static final Creator<Media> CREATOR = new Creator<Media>() {
+        @Override
+        public Media createFromParcel(Parcel in) {
+            return new Media(in);
+        }
+
+        @Override
+        public Media[] newArray(int size) {
+            return new Media[size];
+        }
+    };
 
     public String getName() {
         return mName;
@@ -108,5 +129,17 @@ public class Media {
                 new Media(TYPE_VIDEO, "Video 35", "#003300"),
                 new Media(TYPE_VIDEO, "Video 36", "#9f0000"),
         };
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(mName);
+        parcel.writeString(mType);
+        parcel.writeInt(mColor);
     }
 }

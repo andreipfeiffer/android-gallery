@@ -146,11 +146,11 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         }
     }
 
-    public void preview(Media type) {
+    public void preview(Media media) {
         Intent intent = new Intent(this, PreviewActivity.class);
         // startActivity(intent);
 
-        intent.putExtra("color", type.getColor());
+        intent.putExtra("media", media);
 
         // requestCode e al meu, pun ce vreau
         startActivityForResult(intent, REQUEST_PREVIEW);

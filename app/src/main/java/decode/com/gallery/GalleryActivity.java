@@ -38,7 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 interface ICallback {
-    void preview(String type);
+    void preview(Media type);
 }
 
 // AppCompatActivity pentru compatibilitate cu chestii vechi
@@ -146,11 +146,11 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         }
     }
 
-    public void preview(String type) {
+    public void preview(Media type) {
         Intent intent = new Intent(this, PreviewActivity.class);
         // startActivity(intent);
 
-        intent.putExtra("type", type);
+        intent.putExtra("color", type.getColor());
 
         // requestCode e al meu, pun ce vreau
         startActivityForResult(intent, REQUEST_PREVIEW);

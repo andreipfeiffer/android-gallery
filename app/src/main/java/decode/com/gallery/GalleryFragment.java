@@ -41,10 +41,12 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
-//        if (getActivity() instanceof ICallback && !getActivity().isDestroyed() && !getActivity().isFinishing()) {
-//            // tre sa cast-uim la interfata
-//            ((ICallback) getActivity()).preview(type);
-//        }
+        if (getActivity() instanceof ICallback && !getActivity().isDestroyed() && !getActivity().isFinishing()) {
+            // tre sa cast-uim la interfata
+            Log.i("CLICK", view.getTag().toString());
+
+            ((ICallback) getActivity()).preview((Media) view.getTag());
+        }
     }
 
     class Adapter extends RecyclerView.Adapter<ViewHolder> {
@@ -64,8 +66,11 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
+            int color = media[position].getColor();
             holder.label.setText(media[position].getName());
-            holder.wrapper.setBackgroundColor(media[position].getColor());
+            holder.wrapper.setBackgroundColor(color);
+            holder.wrapper.setTag(media[position]);
+            holder.wrapper.setOnClickListener(GalleryFragment.this);
         }
 
         @Override

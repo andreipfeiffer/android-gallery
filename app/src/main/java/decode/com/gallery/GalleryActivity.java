@@ -4,7 +4,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -13,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -27,6 +31,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 interface ICallback {
     void preview(String type);
@@ -47,6 +56,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     private NavigationView navigation;
     private FloatingActionButton fab;
     private CoordinatorLayout coordinator;
+    private String capturedPhotoPath;
 
     private String tabTitles[] = new String[]{"Photos", "Videos"};
 
@@ -102,19 +112,18 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         drawer = findViewById(R.id.drawer_layout);
 
         navigation = findViewById(R.id.drawer_navigation);
-        navigation.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem item) {
-                        // set item as selected to persist highlight
-                        drawer.closeDrawers();
+        navigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                // set item as selected to persist highlight
+                drawer.closeDrawers();
 
-                        // Code to update the UI based on the item selected
-                        selectMenuItem(item);
+                // Code to update the UI based on the item selected
+                selectMenuItem(item);
 
-                        return true;
-                    }
-                });
+                return true;
+            }
+        });
 
         fab = findViewById(R.id.action_fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -169,28 +178,20 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
                 break;
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK) {
-                    Bundle extras = data.getExtras();
-                    final Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    // when we store the image on disk, we don't receive any result data
+                    // Bundle extras = data.getExtras();
+                    // final Bitmap imageBitmap = (Bitmap) extras.get("data");
 
-                    Snackbar snackbar = Snackbar
-                            .make(coordinator, "Photo was captured", Snackbar.LENGTH_LONG)
-                            .setAction("VIEW", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    showImage(imageBitmap);
-                                }
-                            });
+                    Snackbar snackbar = Snackbar.make(coordinator, "Photo was captured", Snackbar.LENGTH_LONG).setAction("VIEW", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // showImage(imageBitmap);
+                            showImage(capturedPhotoPath);
+                        }
+                    });
                     snackbar.show();
                 } else {
-                    Snackbar
-                            .make(coordinator, "No photo taken", Snackbar.LENGTH_SHORT)
-                            .setAction("RETRY", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    openCamera();
-                                }
-                            })
-                            .show();
+                    toast("No photo taken");
                 }
                 break;
         }
@@ -253,23 +254,67 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                toast("Error occurred while creating the File");
+            }
+
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this, "decode.com.gallery.fileprovider", photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
         }
     }
 
-    private void showImage(Bitmap imageBitmap) {
+    private void showImage(String imagePath) {
+        File imgFile = new File(imagePath);
+
+        if (!imgFile.exists()) {
+            return;
+        }
+
         AlertDialog.Builder ImageDialog = new AlertDialog.Builder(this);
-        ImageDialog
-                .setTitle("Captured photo preview")
-                .setMessage("The following image was captured")
-                .setIcon(R.drawable.ic_camera);
+        ImageDialog.setTitle("Captured photo preview").setIcon(R.drawable.ic_camera).setNegativeButton("CLOSE", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        ;
 
         ImageView imageView = new ImageView(this);
-        imageView.setImageBitmap(imageBitmap);
+        Bitmap imageBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(imageBitmap, imageBitmap.getWidth() / 4, imageBitmap.getHeight() / 4, true);
+
+        imageView.setImageBitmap(resizedBitmap);
 
         ImageDialog.setView(imageView);
         ImageDialog.show();
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        Log.i("PHOTO_DIR", storageDir.toString());
+
+        File image = File.createTempFile(imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */);
+
+        // Save a file: path for use with ACTION_VIEW intents
+        capturedPhotoPath = image.getAbsolutePath();
+        Log.i("PHOTO_PATH", capturedPhotoPath);
+        return image;
     }
 }

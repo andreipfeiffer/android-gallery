@@ -14,6 +14,6 @@ public class PreviewActivity extends AppCompatActivity {
         Media media = getIntent().getExtras().getParcelable("media");
         SquareRelativeLayout wrapper = findViewById(R.id.item_wrapper);
 
-        wrapper.setBackgroundColor(media.getColor());
+//        wrapper.setBackgroundColor(media.getColor());
     }
 }

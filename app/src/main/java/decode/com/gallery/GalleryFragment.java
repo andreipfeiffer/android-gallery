@@ -9,7 +9,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import java.util.List;
 
 /**
  * Created by andreipfeiffer on 2/28/18.
@@ -51,10 +56,14 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
     class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
-        private Media[] media;
+        private List<Media> media;
+        private Picasso thumbPhoto;
+        private Picasso thumbVideo;
 
         private Adapter(String type) {
-            media = Media.getMedia(type);
+            media = Media.getMedia(getContext(), type);
+            thumbPhoto = new Picasso.Builder(getContext()).build();
+            thumbVideo = new Picasso.Builder(getContext()).addRequestHandler(new VideoRequestHandler()).build();
         }
 
         @Override
@@ -66,22 +75,28 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            int color = media[position].getColor();
-            holder.label.setText(media[position].getName());
-            holder.wrapper.setBackgroundColor(color);
-            holder.wrapper.setTag(media[position]);
+            String url = media.get(position).getUrl();
+            String title = media.get(position).getName();
+
+            holder.label.setText(title);
+
+            holder.wrapper.setTag(media.get(position));
             holder.wrapper.setOnClickListener(GalleryFragment.this);
+
+            thumbPhoto.load("file://" + url).fit().centerCrop().into(holder.thumb);
+            thumbVideo.load("video://" + url).fit().centerCrop().into(holder.thumb);
         }
 
         @Override
         public int getItemCount() {
-            return media.length;
+            return media.size();
         }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView label;
+        private ImageView thumb;
         // the type can be any super class
         private View wrapper;
 
@@ -90,6 +105,7 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
             label = v.findViewById(R.id.item_label);
             wrapper = v.findViewById(R.id.item_wrapper);
+            thumb = v.findViewById(R.id.thumb_image);
         }
     }
 }

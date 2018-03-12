@@ -2,6 +2,5 @@
 <decode.com.gallery.SquareRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_wrapper"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="5dp">
+    android:layout_height="match_parent">
 </decode.com.gallery.SquareRelativeLayout>

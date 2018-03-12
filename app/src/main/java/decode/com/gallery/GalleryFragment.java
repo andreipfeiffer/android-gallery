@@ -30,7 +30,7 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
         recycler_view = root.findViewById(R.id.recycler_view);
 
-        LayoutManager = new GridLayoutManager(getContext(), 3);
+        LayoutManager = new GridLayoutManager(getContext(), this.getActivity().getResources().getInteger(R.integer.nr_columns));
         recycler_view.setLayoutManager(LayoutManager);
 
         adapter = new Adapter(type);
@@ -82,7 +82,8 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView label;
-        private SquareRelativeLayout wrapper;
+        // the type can be any super class
+        private View wrapper;
 
         private ViewHolder(View v) {
             super(v);

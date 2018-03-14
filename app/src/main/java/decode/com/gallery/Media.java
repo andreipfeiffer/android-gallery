@@ -1,5 +1,6 @@
 package decode.com.gallery;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.database.Cursor;
@@ -7,6 +8,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +64,7 @@ public class Media implements Parcelable {
         return mUrl;
     }
 
-    public static List<Media> getMedia(Context context, String type) {
+    public static List<Media> getMedia(Activity activity, String type) {
         int mediaType;
 
         // Strings are compared with .equals()
@@ -71,7 +74,7 @@ public class Media implements Parcelable {
             mediaType = MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
         }
 
-        return getMediaList(context, mediaType);
+        return getMediaList(activity.getApplicationContext(), mediaType);
     }
 
     public static List<Media> getMediaList(Context context, int mediaType) {

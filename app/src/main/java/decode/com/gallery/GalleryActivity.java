@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -115,13 +116,13 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         navigation.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
-                // set item as selected to persist highlight
-                drawer.closeDrawers();
+            // set item as selected to persist highlight
+            drawer.closeDrawers();
 
-                // Code to update the UI based on the item selected
-                selectMenuItem(item);
+            // Code to update the UI based on the item selected
+            selectMenuItem(item);
 
-                return true;
+            return true;
             }
         });
 
@@ -285,7 +286,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         AlertDialog.Builder ImageDialog = new AlertDialog.Builder(this);
         ImageDialog.setTitle("Captured photo preview").setIcon(R.drawable.ic_camera).setNegativeButton("CLOSE", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                dialog.cancel();
+            dialog.cancel();
             }
         });
         ;

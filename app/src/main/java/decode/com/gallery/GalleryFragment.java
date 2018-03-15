@@ -1,6 +1,8 @@
 package decode.com.gallery;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -112,19 +114,6 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    // @todo move this on activity level
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQUEST_STORAGE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.i("PERMISSION", "Storage granted");
-            loadGallery();
-        } else {
-            Log.i("PERMISSION", "Storage NOT granted");
-        }
-    }
-
     private void loadGallery() {
         LayoutManager = new GridLayoutManager(getContext(), this.getActivity().getResources().getInteger(R.integer.nr_columns));
         recycler_view.setLayoutManager(LayoutManager);
@@ -134,15 +123,27 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
     }
 
     private void checkPermission() {
+        String PERMISSIONS_SHARED_PREFS = "PERMISSIONS_SHARED_PREFS";
+
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             Log.i("PERMISSION", "we DON'T have Storage permission");
 
+            SharedPreferences prefs = getActivity().getSharedPreferences(PERMISSIONS_SHARED_PREFS, Context.MODE_PRIVATE);
+            Boolean wasRequested = prefs.getBoolean("requested_" + Manifest.permission.READ_EXTERNAL_STORAGE, false);
+
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                Log.i("PERMISSION", "can request permission");
-                requestPermissions(new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, REQUEST_STORAGE);
+                Log.i("PERMISSION", "should request with rationale");
+                ActivityCompat.requestPermissions(getActivity(), new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, REQUEST_STORAGE);
+            } else if (!wasRequested) {
+                Log.i("PERMISSION", "was not request previously");
+
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean("requested_" + Manifest.permission.READ_EXTERNAL_STORAGE, true);
+                editor.commit();
+                ActivityCompat.requestPermissions(getActivity(), new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, REQUEST_STORAGE);
             } else {
-                Log.i("PERMISSION", "cannot request permission");
-                requestPermissions(new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, REQUEST_STORAGE);
+                Log.i("PERMISSION", "was requested previously and Denied");
+                ActivityCompat.requestPermissions(getActivity(), new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE }, REQUEST_STORAGE);
             }
         } else {
             Log.i("PERMISSION", "we have Storage permission");

@@ -48,6 +48,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
     public static final int REQUEST_PREVIEW = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
+    public static final int REQUEST_STORAGE = 3;
 
     // private Integer result = 0;
     private TabLayout tabs;
@@ -75,29 +76,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
         tabs = findViewById(R.id.tabs);
         pager = findViewById(R.id.pager);
-        pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
-            @Override
-            public Fragment getItem(int position) {
-                GalleryFragment fragment = new GalleryFragment();
 
-                Bundle arguments = new Bundle();
-                arguments.putString("type", tabTitles[position].toLowerCase());
-                fragment.setArguments(arguments);
-
-                return fragment;
-            }
-
-            @Override
-            public int getCount() {
-                return tabTitles.length;
-            }
-
-            @Override
-            public CharSequence getPageTitle(int position) {
-                return tabTitles[position];
-            }
-        });
-        tabs.setupWithViewPager(pager);
+        init();
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -317,5 +297,45 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         capturedPhotoPath = image.getAbsolutePath();
         Log.i("PHOTO_PATH", capturedPhotoPath);
         return image;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        Log.i("PERMISSION", String.valueOf(requestCode));
+
+        if (requestCode == REQUEST_STORAGE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.i("PERMISSION", "Storage granted");
+            init();
+        } else {
+            Log.i("PERMISSION", "Storage NOT granted");
+        }
+    }
+
+    private void init() {
+        pager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int position) {
+                GalleryFragment fragment = new GalleryFragment();
+
+                Bundle arguments = new Bundle();
+                arguments.putString("type", tabTitles[position].toLowerCase());
+                fragment.setArguments(arguments);
+
+                return fragment;
+            }
+
+            @Override
+            public int getCount() {
+                return tabTitles.length;
+            }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return tabTitles[position];
+            }
+        });
+        tabs.setupWithViewPager(pager);
     }
 }

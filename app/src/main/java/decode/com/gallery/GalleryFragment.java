@@ -148,7 +148,6 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
         } else {
             Log.i("PERMISSION", "we have Storage permission");
 
-            // this updates only the current fragment, not other fragmets
             loadGallery();
         }
     }

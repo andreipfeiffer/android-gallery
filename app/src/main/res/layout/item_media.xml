@@ -20,4 +20,9 @@
         android:padding="10dp"
         android:textAlignment="textEnd"/>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ripple"></View>
+
 </decode.com.gallery.SquareRelativeLayout>

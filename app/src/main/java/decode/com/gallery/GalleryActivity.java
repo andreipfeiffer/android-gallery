@@ -1,5 +1,6 @@
 package decode.com.gallery;
 
+import android.app.ActivityOptions;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,10 +27,14 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -65,6 +70,11 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // transitions
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        getWindow().setEnterTransition(new Explode());
+        getWindow().setExitTransition(new Explode());
 
         // R = resources (tot ce e in /res/)
         setContentView(R.layout.activity_gallery);
@@ -133,8 +143,11 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
         intent.putExtra("media", media);
 
+        // spunem ca vrem tranzitii spre activitate
+        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+
         // requestCode e al meu, pun ce vreau
-        startActivityForResult(intent, REQUEST_PREVIEW);
+        startActivityForResult(intent, REQUEST_PREVIEW, options.toBundle());
     }
 
     @Override

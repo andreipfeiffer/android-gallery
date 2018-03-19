@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 public class PreviewActivity extends AppCompatActivity {
@@ -20,10 +21,23 @@ public class PreviewActivity extends AppCompatActivity {
         ImageView imgView = findViewById(R.id.thumb_image);
 
         thumbPhoto = new Picasso.Builder(getApplicationContext()).build();
-        thumbPhoto.load("file://" + media.getUrl()).fit().centerCrop().into(imgView);
+        thumbPhoto.load("file://" + media.getUrl()).fit().centerCrop().into(imgView, new Callback() {
+            @Override
+            public void onSuccess() {
+                // start now the transition
+                startPostponedEnterTransition();
+            }
 
-        //        thumbVideo = new Picasso.Builder(getContext()).addRequestHandler(new VideoRequestHandler()).build();
+            @Override
+            public void onError() {
 
-//        wrapper.setBackgroundColor(media.getColor());
+            }
+        });
+
+        // thumbVideo = new Picasso.Builder(getContext()).addRequestHandler(new VideoRequestHandler()).build();
+
+        // don't start until I say so
+        supportPostponeEnterTransition();
+
     }
 }

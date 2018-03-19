@@ -1,5 +1,6 @@
 package decode.com.gallery;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -44,7 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 interface ICallback {
-    void preview(Media type);
+    void preview(Media type, View view);
 }
 
 // AppCompatActivity pentru compatibilitate cu chestii vechi
@@ -73,8 +74,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
         // transitions
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-        getWindow().setEnterTransition(new Explode());
-        getWindow().setExitTransition(new Explode());
+        getWindow().setEnterTransition(new Fade());
+        getWindow().setExitTransition(new Fade());
 
         // R = resources (tot ce e in /res/)
         setContentView(R.layout.activity_gallery);
@@ -137,14 +138,15 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         }
     }
 
-    public void preview(Media media) {
+    @SuppressLint("RestrictedApi")
+    public void preview(Media media, View view) {
         Intent intent = new Intent(this, PreviewActivity.class);
         // startActivity(intent);
 
         intent.putExtra("media", media);
 
         // spunem ca vrem tranzitii spre activitate
-        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this);
+        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, view.findViewById(R.id.thumb_image), "thumb");
 
         // requestCode e al meu, pun ce vreau
         startActivityForResult(intent, REQUEST_PREVIEW, options.toBundle());

@@ -8,7 +8,9 @@
     <ImageView
         android:id="@+id/thumb_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:transitionName="thumb"
+        android:background="@color/colorPrimaryDark"/>
 
     <TextView
         android:id="@+id/item_label"

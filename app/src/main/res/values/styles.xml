@@ -8,6 +8,12 @@
         <item name="colorAccent">@color/colorAccent</item>
 
         <item name="android:windowActivityTransitions">true</item>
+
+        <!-- specify shared element transitions -->
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/preview_image</item>
+        <item name="android:windowSharedElementExitTransition">
+            @transition/preview_image</item>
     </style>
 
     <style name="GalleryTabLayout" parent="Widget.Design.TabLayout">

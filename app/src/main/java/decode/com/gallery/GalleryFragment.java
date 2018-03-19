@@ -55,7 +55,7 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
             // tre sa cast-uim la interfata
             Log.i("CLICK", view.getTag().toString());
 
-            ((ICallback) getActivity()).preview((Media) view.getTag());
+            ((ICallback) getActivity()).preview((Media) view.getTag(), view);
         }
     }
 

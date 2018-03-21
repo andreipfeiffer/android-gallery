@@ -2,8 +2,10 @@ package decode.com.gallery;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -40,6 +42,9 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -58,6 +63,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     public static final int REQUEST_PREVIEW = 1;
     public static final int REQUEST_IMAGE_CAPTURE = 2;
     public static final int REQUEST_STORAGE = 3;
+    public static final String PREFERENCES_PREVIEW_COUNTS = "previewCounts";
 
     // private Integer result = 0;
     private TabLayout tabs;
@@ -69,6 +75,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     private CoordinatorLayout coordinator;
     private String capturedPhotoPath;
     private HashMap<String, Integer> previewCounts;
+    private Gson gson;
 
     private String tabTitles[] = new String[]{"Photos", "Videos"};
 
@@ -76,6 +83,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        gson = new Gson();
 
         // transitions
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
@@ -92,7 +100,15 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
                 previewCounts = (HashMap<String, Integer>) savedInstanceState.getSerializable("previewCounts");
             }
         } else {
-            previewCounts = new HashMap<String, Integer>();
+            // try to get shared prefs
+            SharedPreferences prefs = getSharedPreferences(PREFERENCES_PREVIEW_COUNTS, MODE_PRIVATE);
+            previewCounts = gson.fromJson(prefs.getString("visits", ""), new TypeToken<HashMap<String, Integer>>() {
+            }.getType());
+
+            // it it's still null, we init an empty one
+            if (previewCounts == null) {
+                previewCounts = new HashMap<String, Integer>();
+            }
         }
 
         tabs = findViewById(R.id.tabs);
@@ -171,6 +187,10 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     protected void onPause() {
         super.onPause();
         Log.w("paused", "paused");
+
+        SharedPreferences prefs = getSharedPreferences(PREFERENCES_PREVIEW_COUNTS, Context.MODE_PRIVATE);
+        prefs.edit().putString("visits", gson.toJson(previewCounts)).commit();
+        Log.d("Preferences", "wrote " + prefs.getString("visits", ""));
     }
 
     @Override

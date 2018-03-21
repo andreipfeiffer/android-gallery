@@ -2,11 +2,14 @@ package decode.com.gallery;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -76,6 +79,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     private String capturedPhotoPath;
     private HashMap<String, Integer> previewCounts;
     private Gson gson;
+    private DB.Helper mDB;
 
     private String tabTitles[] = new String[]{"Photos", "Videos"};
 
@@ -84,6 +88,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         super.onCreate(savedInstanceState);
 
         gson = new Gson();
+        mDB = new DB.Helper(this);
 
         // transitions
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
@@ -101,14 +106,27 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
             }
         } else {
             // try to get shared prefs
-            SharedPreferences prefs = getSharedPreferences(PREFERENCES_PREVIEW_COUNTS, MODE_PRIVATE);
-            previewCounts = gson.fromJson(prefs.getString("visits", ""), new TypeToken<HashMap<String, Integer>>() {
-            }.getType());
+//            SharedPreferences prefs = getSharedPreferences(PREFERENCES_PREVIEW_COUNTS, MODE_PRIVATE);
+//            previewCounts = gson.fromJson(prefs.getString("visits", ""), new TypeToken<HashMap<String, Integer>>() {
+//            }.getType());
+
+            previewCounts = new HashMap<>();
+            SQLiteDatabase db = mDB.getReadableDatabase();
+            Cursor cursor = db.rawQuery("SELECT * FROM " + DB.Visit.Entry.TABLE_NAME, null);
+                if (cursor != null && cursor.getCount() > 0) {
+                    cursor.moveToFirst();
+                    do {
+                        previewCounts.put(
+                            cursor.getString(cursor.getColumnIndex(DB.Visit.Entry.COLUMN_URL)),
+                            cursor.getInt(cursor.getColumnIndex(DB.Visit.Entry.COLUMN_VISITS))
+                        );
+                    } while (cursor.moveToNext());
+            }
 
             // it it's still null, we init an empty one
-            if (previewCounts == null) {
-                previewCounts = new HashMap<String, Integer>();
-            }
+//            if (previewCounts == null) {
+//                previewCounts = new HashMap<String, Integer>();
+//            }
         }
 
         tabs = findViewById(R.id.tabs);
@@ -188,9 +206,20 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         super.onPause();
         Log.w("paused", "paused");
 
-        SharedPreferences prefs = getSharedPreferences(PREFERENCES_PREVIEW_COUNTS, Context.MODE_PRIVATE);
-        prefs.edit().putString("visits", gson.toJson(previewCounts)).commit();
-        Log.d("Preferences", "wrote " + prefs.getString("visits", ""));
+//        SharedPreferences prefs = getSharedPreferences(PREFERENCES_PREVIEW_COUNTS, Context.MODE_PRIVATE);
+//        prefs.edit().putString("visits", gson.toJson(previewCounts)).commit();
+//        Log.d("Preferences", "wrote " + prefs.getString("visits", ""));
+
+        SQLiteDatabase db = mDB.getWritableDatabase();
+        for (String key : previewCounts.keySet()) {
+            ContentValues values = new ContentValues();
+            values.put(DB.Visit.Entry.COLUMN_URL, key);
+            values.put(DB.Visit.Entry.COLUMN_VISITS, previewCounts.get(key));
+
+            if (db.update(DB.Visit.Entry.TABLE_NAME, values, DB.Visit.Entry.COLUMN_URL + "= ?", new String[]{key}) <= 0) {
+                db.insert(DB.Visit.Entry.TABLE_NAME, null, values);
+            }
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -75,6 +76,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         // transitions
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         getWindow().setEnterTransition(new Fade());
@@ -86,6 +88,11 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
 
         if (savedInstanceState != null) {
             // result = savedInstanceState.getInt("result", 0);
+            if (savedInstanceState.containsKey("previewCounts")) {
+                previewCounts = (HashMap<String, Integer>) savedInstanceState.getSerializable("previewCounts");
+            }
+        } else {
+            previewCounts = new HashMap<String, Integer>();
         }
 
         tabs = findViewById(R.id.tabs);
@@ -128,8 +135,6 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         });
 
         coordinator = findViewById(R.id.coordinator_Layout);
-
-        previewCounts = new HashMap<String, Integer>();
     }
 
     private void openCamera() {
@@ -225,6 +230,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         // e pierde cand se inchide aplicatia
 
         //outState.putInt("result", result);
+
+        outState.putSerializable("previewCounts", previewCounts);
     }
 
     @Override

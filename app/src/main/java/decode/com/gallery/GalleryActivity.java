@@ -43,9 +43,11 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 interface ICallback {
     void preview(Media type, View view);
+    int getVisits(Media media);
 }
 
 // AppCompatActivity pentru compatibilitate cu chestii vechi
@@ -65,6 +67,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     private FloatingActionButton fab;
     private CoordinatorLayout coordinator;
     private String capturedPhotoPath;
+    private HashMap<String, Integer> previewCounts;
 
     private String tabTitles[] = new String[]{"Photos", "Videos"};
 
@@ -125,6 +128,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         });
 
         coordinator = findViewById(R.id.coordinator_Layout);
+
+        previewCounts = new HashMap<String, Integer>();
     }
 
     private void openCamera() {
@@ -153,6 +158,11 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     }
 
     @Override
+    public int getVisits(Media media) {
+        return previewCounts.containsKey(media.getUrl()) ? previewCounts.get(media.getUrl()) : 0;
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         Log.w("paused", "paused");
@@ -171,6 +181,17 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
         switch (requestCode) {
             case REQUEST_PREVIEW:
                 pager.setCurrentItem(resultCode - 1);
+                if (resultCode == RESULT_OK) {
+                    Media media = data.getParcelableExtra("media");
+                    String url = media.getUrl();
+                    int count = previewCounts.containsKey(url) ? previewCounts.get(url) : 0;
+                    previewCounts.put(url, count + 1);
+
+                    // pass result to all Fragments
+                    for (Fragment f: getSupportFragmentManager().getFragments()) {
+                        f.onActivityResult(requestCode, resultCode, data);
+                    }
+                }
                 break;
             case REQUEST_IMAGE_CAPTURE:
                 if (resultCode == RESULT_OK) {

@@ -2,6 +2,7 @@ package decode.com.gallery;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -23,12 +24,15 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Created by andreipfeiffer on 2/28/18.
  */
 
 public class GalleryFragment extends Fragment implements View.OnClickListener {
 
+    public static final int REQUEST_PREVIEW = 1;
     public static final int REQUEST_STORAGE = 3;
 
     private String type;
@@ -80,16 +84,25 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            String url = media.get(position).getUrl();
-            String title = media.get(position).getName();
+            Media item = media.get(position);
+            String url = item.getUrl();
+            String title = item.getName();
 
             holder.label.setText(title);
 
-            holder.wrapper.setTag(media.get(position));
+            holder.wrapper.setTag(item);
             holder.wrapper.setOnClickListener(GalleryFragment.this);
 
-            thumbPhoto.load("file://" + url).fit().centerCrop().into(holder.thumb);
-            thumbVideo.load("video://" + url).fit().centerCrop().into(holder.thumb);
+            if (item.getType() == Media.TYPE_IMAGE) {
+                thumbPhoto.load("file://" + url).fit().centerCrop().into(holder.thumb);
+            } else {
+                thumbVideo.load("video://" + url).fit().centerCrop().into(holder.thumb);
+            }
+
+            ICallback gallery = (ICallback) getActivity();
+            holder.previewCount.setVisibility(gallery.getVisits(item) > 0 ? View.VISIBLE : View.GONE);
+            holder.previewCount.setText("" + gallery.getVisits(item));
+
         }
 
         @Override
@@ -102,6 +115,7 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
         private TextView label;
         private ImageView thumb;
+        private TextView previewCount;
         // the type can be any super class
         private View wrapper;
 
@@ -111,6 +125,7 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
             label = v.findViewById(R.id.item_label);
             wrapper = v.findViewById(R.id.item_wrapper);
             thumb = v.findViewById(R.id.thumb_image);
+            previewCount = v.findViewById(R.id.preview_count);
         }
     }
 
@@ -149,6 +164,19 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
             Log.i("PERMISSION", "we have Storage permission");
 
             loadGallery();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQUEST_PREVIEW:
+                if (resultCode == RESULT_OK) {
+                    adapter.notifyDataSetChanged();
+                }
+                break;
         }
     }
 }

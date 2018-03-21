@@ -13,6 +13,14 @@
         android:background="@color/colorPrimaryDark"/>
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/preview_count"
+        android:gravity="end"
+        android:padding="10dp"
+        android:textColor="#fff"/>
+
+    <TextView
         android:id="@+id/item_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

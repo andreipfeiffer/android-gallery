@@ -23,6 +23,7 @@ public class Media implements Parcelable {
 
     public static final String TYPE_IMAGE = "photos";
     public static final String TYPE_VIDEO = "videos";
+    public static final String TYPE_AUDIO = "music";
 
     private String mName;
     private String mType;
@@ -65,19 +66,19 @@ public class Media implements Parcelable {
     }
 
     public static List<Media> getMedia(Activity activity, String type) {
-        int mediaType;
+        int mediaType = MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
         // Strings are compared with .equals()
         if (type.equals(TYPE_VIDEO)) {
             mediaType = MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
-        } else {
-            mediaType = MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+        } else if (type.equals(TYPE_AUDIO)) {
+            mediaType = MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO;
         }
 
-        return getMediaList(activity.getApplicationContext(), mediaType);
+        return getMediaList(activity.getApplicationContext(), mediaType, type);
     }
 
-    public static List<Media> getMediaList(Context context, int mediaType) {
+    public static List<Media> getMediaList(Context context, int mediaType, String type) {
 
         Uri queryUri = MediaStore.Files.getContentUri("external");
 
@@ -103,7 +104,7 @@ public class Media implements Parcelable {
                 String name = (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) ? U.format(cursor.getLong(5)) : cursor.getString(4);
                 media.add(
                     new Media(
-                        TYPE_IMAGE,
+                        type,
                         name,
                         cursor.getString(1)
                     )

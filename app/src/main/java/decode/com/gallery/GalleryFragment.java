@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -77,8 +76,9 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            int layout = type.equals(Media.TYPE_AUDIO) ? R.layout.item_audio : R.layout.item_media;
             LayoutInflater in = LayoutInflater.from(getContext());
-            View v = in.inflate(R.layout.item_media, parent, false);
+            View v = in.inflate(layout, parent, false);
             return new ViewHolder(v);
         }
 
@@ -93,16 +93,16 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
             holder.wrapper.setTag(item);
             holder.wrapper.setOnClickListener(GalleryFragment.this);
 
-            if (item.getType() == Media.TYPE_IMAGE) {
+            if (item.getType().equals(Media.TYPE_IMAGE)) {
                 thumbPhoto.load("file://" + url).fit().centerCrop().into(holder.thumb);
-            } else {
+            }
+            if (item.getType().equals(Media.TYPE_VIDEO)) {
                 thumbVideo.load("video://" + url).fit().centerCrop().into(holder.thumb);
             }
 
             ICallback gallery = (ICallback) getActivity();
             holder.previewCount.setVisibility(gallery.getVisits(item) > 0 ? View.VISIBLE : View.GONE);
             holder.previewCount.setText("" + gallery.getVisits(item));
-
         }
 
         @Override
@@ -130,7 +130,12 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
     }
 
     private void loadGallery() {
-        LayoutManager = new GridLayoutManager(getContext(), this.getActivity().getResources().getInteger(R.integer.nr_columns));
+        int nrColumns = this.getActivity().getResources().getInteger(R.integer.nr_columns);
+        if (type.equals(Media.TYPE_AUDIO)) {
+            nrColumns = 1;
+        }
+
+        LayoutManager = new GridLayoutManager(getContext(), nrColumns);
         recycler_view.setLayoutManager(LayoutManager);
 
         adapter = new Adapter(type);

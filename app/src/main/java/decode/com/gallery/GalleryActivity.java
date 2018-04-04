@@ -81,7 +81,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback {
     private Gson gson;
     private DB.Helper mDB;
 
-    private String tabTitles[] = new String[]{"Photos", "Videos"};
+    private String tabTitles[] = new String[]{"Photos", "Videos", "Music"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
